@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { format } from 'date-fns';
 import { useMutation } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { useUploadReviewedDocument, useDownloadStudentDocument } from '../../store/tanstackStore/services/queries';
@@ -139,7 +140,7 @@ const DocumentReviewModal = ({ isOpen, onClose, document, allDocuments, student 
                 <span className="font-medium">Student:</span> {student.fullName}
               </div>
               <div>
-                <span className="font-medium">Uploaded:</span> {new Date(document.uploadedAt).toLocaleDateString()}
+                <span className="font-medium">Uploaded:</span> {format(new Date(document.uploadedAt), 'MMM dd, yyyy h:mm a')}
               </div>
               {document.description && (
                 <div>
@@ -159,7 +160,7 @@ const DocumentReviewModal = ({ isOpen, onClose, document, allDocuments, student 
                   <h3 className="font-medium text-green-900">Review Status</h3>
                 </div>
                 <p className="text-sm text-green-800 mb-2">
-                  This document was reviewed on {new Date(document.reviewedAt || document.uploadedAt).toLocaleDateString()}
+                  This document was reviewed on {format(new Date(document.reviewedAt || document.uploadedAt), 'MMM dd, yyyy h:mm a')}
                 </p>
                 <div className="mt-4 pt-4 border-t border-green-200">
                   <h4 className="text-sm font-medium text-green-900 mb-2">
@@ -236,7 +237,7 @@ const DocumentReviewModal = ({ isOpen, onClose, document, allDocuments, student 
                                     <span>{(reviewDoc.fileSize / 1024 / 1024).toFixed(2)} MB</span>
                                   )}
                                   <span>&bull;</span>
-                                  <span>Uploaded: {new Date(reviewDoc.uploadedAt).toLocaleDateString()}</span>
+                                  <span>Uploaded: {format(new Date(reviewDoc.uploadedAt), 'MMM dd, yyyy h:mm a')}</span>
                                 </div>
                               </div>
                             </div>

@@ -105,12 +105,27 @@ const StudentDocumentList = ({ student, onDocumentSelect }) => {
   };
 
   const filteredDocuments = documents?.filter(doc => {
-    const matchesFilter = filter === 'ALL' ||
-      (filter === 'REVIEWED' ? doc.isReviewed : doc.type === filter);
+    const matchesFilter = filter === 'ALL'
+      ? doc.type !== 'REVIEWED'
+      : doc.type === filter;
     const matchesSearch = doc.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       doc.description?.toLowerCase().includes(searchTerm.toLowerCase());
     return matchesFilter && matchesSearch;
   }) || [];
+
+  const sortedDocuments = [...filteredDocuments].sort((a, b) => {
+    if (a.isReviewed !== b.isReviewed) return a.isReviewed ? 1 : -1;
+    return new Date(b.uploadedAt) - new Date(a.uploadedAt);
+  });
+
+  const FILTER_TABS = [
+    { value: 'ALL', label: 'All Documents' },
+    { value: 'PROPOSAL', label: 'Proposals' },
+    { value: 'DISSERTATION', label: 'Dissertations' },
+    { value: 'CHAPTER', label: 'Chapters' },
+    { value: 'OTHER', label: 'Other' },
+    { value: 'REVIEWED', label: 'Reviewed' },
+  ];
 
   if (isLoading) {
     return (
@@ -141,8 +156,8 @@ const StudentDocumentList = ({ student, onDocumentSelect }) => {
             </p>
           </div>
 
-          {/* Search and Filter */}
-          <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+          {/* Search */}
+          <div className="w-full sm:w-auto">
             <input
               type="text"
               placeholder="Search documents..."
@@ -150,24 +165,29 @@ const StudentDocumentList = ({ student, onDocumentSelect }) => {
               onChange={(e) => setSearchTerm(e.target.value)}
               className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
             />
-            <select
-              value={filter}
-              onChange={(e) => setFilter(e.target.value)}
-              className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
-            >
-              <option value="ALL">All Documents</option>
-              <option value="PROPOSAL">Proposals</option>
-              <option value="DISSERTATION">Dissertations</option>
-              <option value="CHAPTER">Chapters</option>
-              <option value="OTHER">Other</option>
-              <option value="REVIEWED">Reviewed</option>
-            </select>
           </div>
+        </div>
+
+        {/* Filter Tabs */}
+        <div className="mt-3 flex flex-wrap gap-1 bg-gray-100 p-1 rounded-lg">
+          {FILTER_TABS.map(tab => (
+            <button
+              key={tab.value}
+              onClick={() => setFilter(tab.value)}
+              className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
+                filter === tab.value
+                  ? 'bg-white text-blue-600 shadow-sm'
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
         </div>
       </div>
 
       <div className="p-4">
-        {filteredDocuments.length === 0 ? (
+        {sortedDocuments.length === 0 ? (
           <div className="text-center py-8">
             <svg
               className="mx-auto h-14 w-14 text-gray-400"
@@ -192,7 +212,7 @@ const StudentDocumentList = ({ student, onDocumentSelect }) => {
           </div>
         ) : (
           <div className="space-y-3">
-            {filteredDocuments.map((document) => {
+            {sortedDocuments.map((document) => {
               const dueDate = addDays(new Date(document.uploadedAt), 14);
               const daysLeft = differenceInDays(dueDate, new Date());
               let dueTextClass = 'text-gray-500';
@@ -246,7 +266,7 @@ const StudentDocumentList = ({ student, onDocumentSelect }) => {
                     )}
 
                     <div className="flex items-center gap-4 text-xs text-gray-500">
-                      <span>Uploaded: {format(new Date(document.uploadedAt), 'MMM dd, yyyy')}</span>
+                      <span>Uploaded: {format(new Date(document.uploadedAt), 'MMM dd, yyyy h:mm a')}</span>
                       {document.uploadedBy && (
                         <span>By: {document.uploadedBy.name}</span>
                       )}
@@ -254,7 +274,7 @@ const StudentDocumentList = ({ student, onDocumentSelect }) => {
                         <span>{(document.fileSize / 1024 / 1024).toFixed(2)} MB</span>
                       )}
                       {document.reviewedAt ? (
-                        <span>Reviewed: {format(new Date(document.reviewedAt), 'MMM dd, yyyy')}</span>
+                        <span>Reviewed: {format(new Date(document.reviewedAt), 'MMM dd, yyyy h:mm a')}</span>
                       ) : (
                         <span className={dueTextClass}>{dueLabel}</span>
                       )}
@@ -262,36 +282,38 @@ const StudentDocumentList = ({ student, onDocumentSelect }) => {
                   </div>
 
                   <div className="flex items-center gap-2 ml-4">
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDownload(document);
-                      }}
-                      disabled={downloadMutation.isPending && downloadingId === document.id}
-                      className={`px-4 py-2 text-sm font-medium bg-white border border-gray-300 rounded-md transition-colors flex flex-row items-center gap-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer ${
-                        downloadingId === document.id 
-                          ? 'text-gray-400 cursor-not-allowed' 
-                          : 'text-gray-700 hover:bg-gray-50'
-                      }`}
-                      title="Download document"
-                    >
-                      {downloadingId === document.id ? (
-                        <>
-                          <svg className="w-4 h-4 animate-spin text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                          </svg>
-                          Downloading...
-                        </>
-                      ) : (
-                        <>
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                          </svg>
-                          Download
-                        </>
-                      )}
-                    </button>
+                    {!document.isReviewed && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDownload(document);
+                        }}
+                        disabled={downloadMutation.isPending && downloadingId === document.id}
+                        className={`px-4 py-2 text-sm font-medium bg-white border border-gray-300 rounded-md transition-colors flex flex-row items-center gap-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer ${
+                          downloadingId === document.id 
+                            ? 'text-gray-400 cursor-not-allowed' 
+                            : 'text-gray-700 hover:bg-gray-50'
+                        }`}
+                        title="Download document"
+                      >
+                        {downloadingId === document.id ? (
+                          <>
+                            <svg className="w-4 h-4 animate-spin text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            Downloading...
+                          </>
+                        ) : (
+                          <>
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                            Download
+                          </>
+                        )}
+                      </button>
+                    )}
                     {document.isReviewed || document.type === 'REVIEWED' ? (
                       <button
                         onClick={(e) => {
