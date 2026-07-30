@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Icon } from '@iconify/react';
-import { useGetSupervisorTickets, useCreateSupportTicket, useReplyToTicket, useGetSupervisorProfile } from '../../store/tanstackStore/services/queries';
+import { useGetSupervisorTickets, useCreateSupportTicket, useReplyToTicket } from '../../store/tanstackStore/services/queries';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { io } from 'socket.io-client';
@@ -10,7 +10,6 @@ import { useQueryClient } from '@tanstack/react-query';
 const SupportTickets = () => {
   const queryClient = useQueryClient();
   const { data: ticketsData, isLoading } = useGetSupervisorTickets();
-  const { data: profileData } = useGetSupervisorProfile();
   const createMutation = useCreateSupportTicket();
   const replyMutation = useReplyToTicket();
 
@@ -89,7 +88,6 @@ const SupportTickets = () => {
   }, [selectedTicket?.id]);
 
   const tickets = ticketsData?.tickets || [];
-  const currentUserName = profileData?.name || 'User';
 
   const handleCreateSubmit = async (e) => {
     e.preventDefault();
@@ -346,14 +344,14 @@ const SupportTickets = () => {
 
             <div className="p-6 flex-1 overflow-y-auto bg-gray-50 space-y-4">
               {liveMessages.map((msg, index) => (
-                <div key={index} className={`flex flex-col ${msg.senderName !== currentUserName ? 'items-start' : 'items-end'}`}>
+                <div key={index} className={`flex flex-col ${msg.senderAdminId ? 'items-start' : 'items-end'}`}>
                   <div className={`max-w-[85%] rounded-2xl px-5 py-3 shadow-sm ${
-                    msg.senderName !== currentUserName
+                    msg.senderAdminId
                       ? 'bg-white border border-gray-100 text-gray-800'
                       : 'bg-[#23398B] text-white'
                   }`}>
                     <div className="text-xs font-semibold mb-1 opacity-80 flex items-center gap-2">
-                      {msg.senderName || 'Unknown'}
+                      {msg.senderAdmin?.name || msg.senderName || 'Unknown'}
                       <span className="font-normal opacity-70">• {format(new Date(msg.createdAt), 'h:mm a')}</span>
                     </div>
                     <div className="text-sm whitespace-pre-wrap">{msg.message}</div>
