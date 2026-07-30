@@ -13,7 +13,8 @@ import {
   RiNotification3Line,
   RiSettings5Line,
   RiFileTextLine,
-  RiCalendarLine
+  RiCalendarLine,
+  RiCustomerService2Line
 } from 'react-icons/ri';
 
 const otherNavItems = [
@@ -36,6 +37,7 @@ const Sidebar = () => {
     { name: 'Documents', path: '/documents', icon: RiFileTextLine },
     { name: 'Appointments', path: '/appointments', icon: RiCalendarLine },
     { name: 'Direct Messages', path: '/direct-messages', icon: RiMessage2Line, badge: unreadCount },
+    { name: 'Support Tickets', path: '/support-tickets', icon: RiCustomerService2Line },
   ];
 
   const handleLogout = () => {

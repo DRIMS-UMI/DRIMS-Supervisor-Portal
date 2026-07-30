@@ -27,7 +27,10 @@ import {
   deleteAvailabilityService,
   getAppointmentsService,
   updateAppointmentService,
-  getCampuses
+  getCampuses,
+  getSupervisorTicketsService,
+  createSupportTicketService,
+  replyToTicketService
 } from "./api";
 
 /* ********** AUTH QUERIES ********** */
@@ -276,5 +279,34 @@ export const useGetCampuses = () => {
     queryKey: ['campuses'],
     queryFn: getCampuses,
     staleTime: 1000 * 60 * 60, // Cache for 1 hour
+  });
+};
+
+/* ********** SUPPORT TICKETS ********** */
+
+export const useGetSupervisorTickets = () => {
+  return useQuery({
+    queryKey: ['supervisorTickets'],
+    queryFn: getSupervisorTicketsService,
+  });
+};
+
+export const useCreateSupportTicket = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: createSupportTicketService,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['supervisorTickets'] });
+    },
+  });
+};
+
+export const useReplyToTicket = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: replyToTicketService,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['supervisorTickets'] });
+    },
   });
 };

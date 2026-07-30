@@ -296,3 +296,36 @@ export const getCampuses = async () => {
         errorHandling(error);
     }
 };
+
+/* ********** SUPPORT TICKETS ********** */
+
+export const getSupervisorTicketsService = async () => {
+    try {
+        const response = await apiRequest.get("/tickets/supervisor/me");
+        return response.data;
+    } catch (error) {
+        errorHandling(error);
+    }
+};
+
+export const createSupportTicketService = async (data) => {
+    try {
+        const response = await apiRequest.post("/tickets", data, {
+            headers: data instanceof FormData ? { 'Content-Type': 'multipart/form-data' } : undefined
+        });
+        return response.data;
+    } catch (error) {
+        errorHandling(error);
+    }
+};
+
+export const replyToTicketService = async ({ id, data }) => {
+    try {
+        const response = await apiRequest.post(`/tickets/${id}/messages`, data, {
+            headers: data instanceof FormData ? { 'Content-Type': 'multipart/form-data' } : undefined
+        });
+        return response.data;
+    } catch (error) {
+        errorHandling(error);
+    }
+};

@@ -14,6 +14,7 @@ import Notifications from './pages/5.Notifications/Notifications';
 import Settings from './pages/6.Settings/Settings';
 import Documents from './pages/7.Documents/Documents';
 import Appointments from './pages/8.Appointments/Appointments';
+import SupportTickets from './pages/9.SupportTickets/SupportTickets';
 
 // Layout
 import Layout from './components/Layout/Layout';
@@ -109,6 +110,7 @@ function AppRoutes() {
         <Route path="appointments" element={<Appointments />} />
         <Route path="direct-messages" element={<DirectMessages />} />
         <Route path="notifications" element={<Notifications />} />
+        <Route path="support-tickets" element={<SupportTickets />} />
         <Route path="settings" element={<Settings />} />
       </Route>
       
