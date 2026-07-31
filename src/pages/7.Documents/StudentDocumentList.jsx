@@ -288,7 +288,7 @@ const StudentDocumentList = ({ student, onDocumentSelect }) => {
                           e.stopPropagation();
                           handleDownload(document);
                         }}
-                        disabled={downloadMutation.isPending && downloadingId === document.id}
+                        disabled={downloadingId === document.id}
                         className={`px-4 py-2 text-sm font-medium bg-white border border-gray-300 rounded-md transition-colors flex flex-row items-center gap-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer ${
                           downloadingId === document.id 
                             ? 'text-gray-400 cursor-not-allowed' 
