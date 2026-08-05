@@ -28,6 +28,8 @@ const Notifications = () => {
           }
         }
       );
+    } else if (data.type === 'document_deleted' && data.studentName) {
+      toast.info(`${data.studentName} deleted a document`);
     }
   }, []);
 

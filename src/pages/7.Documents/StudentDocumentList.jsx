@@ -13,7 +13,7 @@ const StudentDocumentList = ({ student, onDocumentSelect }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [downloadingId, setDownloadingId] = useState(null);
 
-  const { data: response, isLoading, error } = useGetStudentDocuments(student.id);
+  const { data: response, isLoading, error, refetch } = useGetStudentDocuments(student.id);
 
   // Extract documents array from the response
   const documents = response?.documents || [];
@@ -22,10 +22,13 @@ const StudentDocumentList = ({ student, onDocumentSelect }) => {
   const handleDocumentUpdate = useCallback((data) => {
     console.log('Document update received:', data);
     if (data.type === 'new_document_uploaded' && data.document?.studentId === student.id) {
-      // Refresh the document list to show the new document
-      window.location.reload();
+      // Refresh the document list in-place to show the new document (no full page reload)
+      refetch();
+    } else if (data.type === 'document_deleted' && data.studentId === student.id) {
+      // Refresh the document list in-place to remove the deleted document
+      refetch();
     }
-  }, [student.id]);
+  }, [student.id, refetch]);
 
   // Initialize socket connection
   useSocket(handleDocumentUpdate, null, null);

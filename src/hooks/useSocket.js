@@ -57,6 +57,7 @@ export function useSocket(onMessage, onUserStatusChange, onTyping) {
     socket.on('online_users_updated', handleUserStatusChange);
     socket.on('user_typing', handleTyping);
     socket.on('new_document_uploaded', handleMessage);
+    socket.on('document_deleted', handleMessage);
 
     // Connection event handlers
     socket.on('connect', () => {
@@ -79,6 +80,8 @@ export function useSocket(onMessage, onUserStatusChange, onTyping) {
       socket.off('user_status_changed', handleUserStatusChange);
       socket.off('online_users_updated', handleUserStatusChange);
       socket.off('user_typing', handleTyping);
+      socket.off('new_document_uploaded', handleMessage);
+      socket.off('document_deleted', handleMessage);
       socket.off('connect');
       socket.off('disconnect');
       socket.off('connect_error');

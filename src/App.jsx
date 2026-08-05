@@ -1,5 +1,6 @@
 import React, { useCallback } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { toast } from 'sonner';
 import { useSocket } from './hooks/useSocket';
@@ -28,10 +29,13 @@ import SupportChatWidget from './components/SupportChatWidget';
 
 // Global Document Notification Handler
 const DocumentNotificationHandler = () => {
+  const queryClient = useQueryClient();
   const handleDocumentNotification = useCallback((data) => {
     console.log('Global document notification received:', data);
     if (data.type === 'new_document_uploaded') {
       const document = data.document;
+      queryClient.invalidateQueries({ queryKey: ['pendingReviews'] });
+      queryClient.invalidateQueries({ queryKey: ['studentDocuments'] });
       toast.success(
         `New document uploaded by ${document.studentName}: ${document.title}`,
         {
@@ -45,8 +49,12 @@ const DocumentNotificationHandler = () => {
           }
         }
       );
+    } else if (data.type === 'document_deleted' && data.studentName) {
+      queryClient.invalidateQueries({ queryKey: ['pendingReviews'] });
+      queryClient.invalidateQueries({ queryKey: ['studentDocuments'] });
+      toast.info(`${data.studentName} deleted a document`);
     }
-  }, []);
+  }, [queryClient]);
 
   // Initialize socket connection
   useSocket(handleDocumentNotification, null, null);

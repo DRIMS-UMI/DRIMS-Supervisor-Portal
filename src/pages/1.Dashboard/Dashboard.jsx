@@ -6,12 +6,14 @@ import {
   useGetSupervisorProfile,
   useGetRecentMessages,
   useGetAssignedStudents,
-  useGetStatusStatistics
+  useGetStatusStatistics,
+  useGetPendingReviews
 } from "../../store/tanstackStore/services/queries";
 import DashboardStats from "./DashboardStats";
 import DashboardDirectMessages from "./DashboardDirectMessages";
 import DashboardStatusReportChat from "./DashboardStatusReportChat";
 import DashboardRecentlyAddedTable from "./DashboardRecentlyAddedTable";
+import DashboardPendingReview from "./DashboardPendingReview";
 
 const STATUS_COLORS = ["#22C55E", "#F59E42", "#FACC15", "#6366F1", "#F43F5E"];
 
@@ -25,6 +27,7 @@ const Dashboard = () => {
   const { data: messagesData, isLoading: messagesLoading } = useGetRecentMessages();
   const { data: studentsData, isLoading: studentsLoading } = useGetAssignedStudents();
   const { data: statusStatsData, isLoading: statusStatsLoading } = useGetStatusStatistics(selectedStatusCategory);
+  const { data: pendingReviews, isLoading: pendingReviewsLoading, isError: pendingReviewsError } = useGetPendingReviews();
 
   // Transform messages data
   const messages = useMemo(() => {
@@ -139,6 +142,10 @@ const Dashboard = () => {
     navigate('/students');
   };
 
+  const handleViewAllDocuments = () => {
+    navigate('/documents');
+  };
+
   if (profileLoading || statsLoading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -191,6 +198,15 @@ const Dashboard = () => {
           data={recentlyAddedStudents}
           isLoading={studentsLoading}
           onViewMore={handleViewMoreStudents}
+        />
+      </div>
+      {/* Pending Reviews Section */}
+      <div className="px-6 mb-6">
+        <DashboardPendingReview
+          data={pendingReviews}
+          isLoading={pendingReviewsLoading}
+          isError={pendingReviewsError}
+          onViewMore={handleViewAllDocuments}
         />
       </div>
     </div>

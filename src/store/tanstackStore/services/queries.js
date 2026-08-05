@@ -19,6 +19,7 @@ import {
   getUnreadMessageCount,
   getRecentMessages,
   getStatusStatistics,
+  getPendingReviews,
   getStudentDocumentsService,
   downloadStudentDocumentService,
   uploadReviewedDocumentService,
@@ -189,6 +190,14 @@ export const useGetStatusStatistics = (category = 'main') => {
   });
 };
 
+export const useGetPendingReviews = () => {
+  return useQuery({
+    queryKey: ['pendingReviews'],
+    queryFn: getPendingReviews,
+    select: (data) => data?.pendingReviews || [],
+  });
+};
+
 /* ********** MESSAGES QUERIES ********** */
 
 export const useGetUnreadMessageCount = () => {
@@ -222,7 +231,8 @@ export const useUploadReviewedDocument = () => {
     mutationFn: ({ documentId, formData }) => uploadReviewedDocumentService(documentId, formData),
     onSuccess: (_, { documentId }) => {
       // Invalidate student documents to refresh the list
-      queryClient.invalidateQueries(['studentDocuments']);
+      queryClient.invalidateQueries({ queryKey: ['studentDocuments'] });
+      queryClient.invalidateQueries({ queryKey: ['pendingReviews'] });
     },
   });
 }; 

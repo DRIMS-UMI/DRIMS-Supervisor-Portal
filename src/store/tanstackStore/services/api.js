@@ -191,6 +191,15 @@ export const getStatusStatistics = async (category = 'main') => {
     }
 };
 
+export const getPendingReviews = async () => {
+    try {
+        const response = await apiRequest.get("/supervisor/dashboard/pending-reviews");
+        return response.data;
+    } catch (error) {
+        errorHandling(error);
+    }
+};
+
 /* ********** MESSAGES ********** */
 
 export const getUnreadMessageCount = async () => {
