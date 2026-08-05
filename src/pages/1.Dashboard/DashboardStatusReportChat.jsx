@@ -63,10 +63,10 @@ const DashboardStatusReportChat = ({
   };
 
   return (
-    <Card className="flex flex-col h-full">
+    <Card className="flex flex-col h-full shadow-sm rounded-lg border-0 bg-white">
       <CardHeader className="pb-2 flex flex-row items-start justify-between gap-2">
         <div className="gap-0">
-          <h3 className="text-md relative font-[Inter-Medium] text-gray-700">Status Distribution</h3>
+          <h3 className="text-lg font-medium text-gray-900">Status Distribution</h3>
           <p className="text-xs font-[Inter-Regular] text-muted-foreground">
             Current student status breakdown
           </p>

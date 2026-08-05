@@ -53,6 +53,12 @@ const DocumentNotificationHandler = () => {
       queryClient.invalidateQueries({ queryKey: ['pendingReviews'] });
       queryClient.invalidateQueries({ queryKey: ['studentDocuments'] });
       toast.info(`${data.studentName} deleted a document`);
+    } else if (data.type === 'new_message') {
+      queryClient.invalidateQueries({ queryKey: ['recentMessages'] });
+      queryClient.invalidateQueries({ queryKey: ['unreadMessageCount'] });
+    } else if (data.type === 'message_read') {
+      queryClient.invalidateQueries({ queryKey: ['recentMessages'] });
+      queryClient.invalidateQueries({ queryKey: ['unreadMessageCount'] });
     }
   }, [queryClient]);
 

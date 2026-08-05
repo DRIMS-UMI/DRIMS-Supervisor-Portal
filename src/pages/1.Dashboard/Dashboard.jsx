@@ -1,24 +1,25 @@
 import React, { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../context/AuthContext";
 import {
   useGetDashboardStats,
   useGetSupervisorProfile,
   useGetRecentMessages,
   useGetAssignedStudents,
   useGetStatusStatistics,
-  useGetPendingReviews
+  useGetPendingReviews,
+  useGetUnreadMessageCount
 } from "../../store/tanstackStore/services/queries";
 import DashboardStats from "./DashboardStats";
 import DashboardDirectMessages from "./DashboardDirectMessages";
 import DashboardStatusReportChat from "./DashboardStatusReportChat";
 import DashboardRecentlyAddedTable from "./DashboardRecentlyAddedTable";
 import DashboardPendingReview from "./DashboardPendingReview";
+import DashboardUpcomingAppointments from "./DashboardUpcomingAppointments";
+import DocumentReviewModal from "@/pages/7.Documents/DocumentReviewModal";
 
 const STATUS_COLORS = ["#22C55E", "#F59E42", "#FACC15", "#6366F1", "#F43F5E"];
 
 const Dashboard = () => {
-  const { user } = useAuth();
   const navigate = useNavigate();
   const [selectedStatusCategory, setSelectedStatusCategory] = useState('main');
 
@@ -28,15 +29,25 @@ const Dashboard = () => {
   const { data: studentsData, isLoading: studentsLoading } = useGetAssignedStudents();
   const { data: statusStatsData, isLoading: statusStatsLoading } = useGetStatusStatistics(selectedStatusCategory);
   const { data: pendingReviews, isLoading: pendingReviewsLoading, isError: pendingReviewsError } = useGetPendingReviews();
+  const { data: unreadMessagesData } = useGetUnreadMessageCount();
+  const [reviewDocument, setReviewDocument] = useState(null);
 
   // Transform messages data
   const messages = useMemo(() => {
     if (!messagesData?.conversations) return [];
 
-    return messagesData.conversations.slice(0, 3).map((conversation, index) => {
+    // Unread conversations first, then most recently updated
+    const sortedConversations = [...messagesData.conversations].sort((a, b) => {
+      const aUnread = (a.unreadCount || 0) > 0;
+      const bUnread = (b.unreadCount || 0) > 0;
+      if (aUnread !== bUnread) return aUnread ? -1 : 1;
+      return new Date(b.updatedAt) - new Date(a.updatedAt);
+    });
+
+    return sortedConversations.slice(0, 3).map((conversation, index) => {
       const lastMessage = conversation.lastMessage;
-      // Use the otherParticipant object that the API already provides
       const otherParticipant = conversation.otherParticipant;
+      const unreadCount = conversation.unreadCount || 0;
 
       // Generate initials from name
       const getInitials = (name) => {
@@ -69,10 +80,12 @@ const Dashboard = () => {
             second: '2-digit'
           }) :
           "N/A",
-        color: colors[index % colors.length]
+        color: colors[index % colors.length],
+        isUnread: unreadCount > 0,
+        unreadCount
       };
     });
-  }, [messagesData, user?.id]);
+  }, [messagesData]);
 
   // Transform status statistics data for chart
   const statusChartData = useMemo(() => {
@@ -146,6 +159,14 @@ const Dashboard = () => {
     navigate('/documents');
   };
 
+  const handleReviewDocument = (doc) => {
+    setReviewDocument(doc);
+  };
+
+  const handleCloseReviewModal = () => {
+    setReviewDocument(null);
+  };
+
   if (profileLoading || statsLoading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -183,6 +204,7 @@ const Dashboard = () => {
         <DashboardDirectMessages
           messages={messages}
           isLoading={messagesLoading}
+          unreadCount={unreadMessagesData?.unreadCount || 0}
           onViewMore={handleViewMoreMessages}
         />
         <DashboardStatusReportChat
@@ -192,23 +214,36 @@ const Dashboard = () => {
           isLoading={statusStatsLoading}
         />
       </div>
-      {/* Recently Added Table Section */}
-      <div className="px-6 mb-6">
+      {/* Upcoming Appointments & Pending Reviews Section */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 px-6 mb-6">
+        <DashboardUpcomingAppointments />
+        <DashboardPendingReview
+          data={pendingReviews}
+          isLoading={pendingReviewsLoading}
+          isError={pendingReviewsError}
+          onViewMore={handleViewAllDocuments}
+          onReview={handleReviewDocument}
+        />
+      </div>
+      {/* Recently Added Students - Full Width */}
+      <div className="grid grid-cols-1 gap-4 px-6 mb-6">
         <DashboardRecentlyAddedTable
           data={recentlyAddedStudents}
           isLoading={studentsLoading}
           onViewMore={handleViewMoreStudents}
         />
       </div>
-      {/* Pending Reviews Section */}
-      <div className="px-6 mb-6">
-        <DashboardPendingReview
-          data={pendingReviews}
-          isLoading={pendingReviewsLoading}
-          isError={pendingReviewsError}
-          onViewMore={handleViewAllDocuments}
+
+      {/* Document Review Modal */}
+      {reviewDocument && (
+        <DocumentReviewModal
+          isOpen={!!reviewDocument}
+          onClose={handleCloseReviewModal}
+          document={reviewDocument}
+          allDocuments={[]}
+          student={reviewDocument.student}
         />
-      </div>
+      )}
     </div>
   );
 };
