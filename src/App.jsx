@@ -24,6 +24,7 @@ import GradeManagement from './pages/3.Grades/GradeManagement';
 
 // PWA Component
 import PWAInstaller from './components/PWAInstaller';
+import PWAUpdateToast from './components/PWAUpdateToast';
 
 import SupportChatWidget from './components/SupportChatWidget';
 
@@ -142,6 +143,7 @@ function App() {
       </AuthProvider>
       {/* PWA Installer moved outside AuthProvider so it shows on login page */}
       <PWAInstaller />
+      <PWAUpdateToast />
       <DocumentNotificationHandler />
       <SupportChatWidget />
     </BrowserRouter>

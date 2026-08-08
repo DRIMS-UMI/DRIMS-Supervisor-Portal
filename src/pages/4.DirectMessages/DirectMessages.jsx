@@ -127,18 +127,17 @@ const DirectMessages = () => {
       });
       console.log('Successfully marked messages as read');
 
-      // Reload messages to get updated readBy arrays
-      loadMessages(conversationId);
-
-      // Reload conversations to clear the unread badge for this conversation
-      loadConversations();
+      // Clear the unread badge for this conversation without a full reload
+      setConversations(prev =>
+        prev.map(c => (c.id === conversationId ? { ...c, unreadCount: 0 } : c))
+      );
 
       // Invalidate unread count to update the sidebar badge
       queryClient.invalidateQueries({ queryKey: ['unreadMessageCount'] });
     } catch (err) {
       console.error('Failed to mark messages as read:', err);
     }
-  }, [loadMessages, loadConversations, queryClient]);
+  }, [queryClient]);
 
   // ========================================
   // PRINT FUNCTIONALITY

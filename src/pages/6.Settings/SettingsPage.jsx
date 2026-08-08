@@ -1,13 +1,32 @@
 import React, { useState, useEffect } from 'react';
 import PageHeader from '../../components/ui/PageHeader';
-import { Lock, User, X, Eye, EyeOff, Loader2 } from 'lucide-react';
+import { Lock, User, X, Eye, EyeOff, Loader2, Info } from 'lucide-react';
 
 import { toast } from 'sonner';
 import { useGetSupervisorProfile } from '../../store/tanstackStore/services/queries';
 import { useMutation } from '@tanstack/react-query';
 import { updateSupervisorProfile, changePassword } from '../../store/tanstackStore/services/api';
 
-const SettingSection = ({ icon: Icon, title, children }) => (
+const APP_INFO = __APP_VERSION__;
+
+const formatBuildDate = (iso) => {
+  if (!iso) return 'Not available';
+  try {
+    return new Date(iso).toLocaleString(undefined, {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  } catch {
+    return iso;
+  }
+};
+
+const SettingSection = ({ icon, title, children }) => {
+  const Icon = icon;
+  return (
   <div className="bg-white rounded-lg shadow-sm p-6">
     <div className="flex items-center gap-3 mb-6">
       <div className="p-2 bg-blue-100 rounded-lg">
@@ -19,7 +38,8 @@ const SettingSection = ({ icon: Icon, title, children }) => (
       {children}
     </div>
   </div>
-);
+  );
+};
 
 const Modal = ({ isOpen, onClose, title, children }) => {
   if (!isOpen) return null;
@@ -45,6 +65,7 @@ const SettingsPage = () => {
   
   const { data: userData, isLoading } = useGetSupervisorProfile();
  
+  const [previousBuild] = useState(() => localStorage.getItem('umi_prev_app_version'));
   const [userDetails, setUserDetails] = useState({
     name: '',
     email: '',
@@ -219,6 +240,26 @@ const SettingsPage = () => {
             </button>
           </div>
          
+        </SettingSection>
+
+        {/* About / App version */}
+        <SettingSection icon={Info} title="About">
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-semantic-text-secondary">App version</p>
+              <p className="text-sm font-medium">{APP_INFO?.version && APP_INFO.version !== '0.0.0' ? `v${APP_INFO.version}` : 'DRIMS Staff Portal'}</p>
+            </div>
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-semantic-text-secondary">Build date</p>
+              <p className="text-sm font-medium">{formatBuildDate(APP_INFO?.build)}</p>
+            </div>
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-semantic-text-secondary">Previous build</p>
+              <p className="text-sm font-medium">
+                {previousBuild && previousBuild !== APP_INFO?.build ? formatBuildDate(previousBuild) : 'First install'}
+              </p>
+            </div>
+          </div>
         </SettingSection>
       </div>
 
