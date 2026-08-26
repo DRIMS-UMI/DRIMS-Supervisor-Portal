@@ -31,7 +31,13 @@ import {
   getCampuses,
   getSupervisorTicketsService,
   createSupportTicketService,
-  replyToTicketService
+  replyToTicketService,
+  createGuidelineService,
+  getSupervisorGuidelinesService,
+  downloadGuidelineService,
+  addGuidelineCommentService,
+  shareGuidelineService,
+  getGuidelineRecipientsService
 } from "./api";
 
 /* ********** AUTH QUERIES ********** */
@@ -318,5 +324,58 @@ export const useReplyToTicket = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['supervisorTickets'] });
     },
+  });
+};
+
+/* ********** GUIDELINES ********** */
+
+export const useCreateGuideline = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: createGuidelineService,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['supervisorGuidelines'] });
+    },
+  });
+};
+
+export const useGetSupervisorGuidelines = () => {
+  return useQuery({
+    queryKey: ['supervisorGuidelines'],
+    queryFn: getSupervisorGuidelinesService,
+  });
+};
+
+export const useDownloadGuideline = () => {
+  return useMutation({
+    mutationFn: downloadGuidelineService,
+  });
+};
+
+export const useAddGuidelineComment = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: addGuidelineCommentService,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['supervisorGuidelines'] });
+    },
+  });
+};
+
+export const useShareGuideline = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: shareGuidelineService,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['supervisorGuidelines'] });
+    },
+  });
+};
+
+export const useGetGuidelineRecipients = (guidelineId) => {
+  return useQuery({
+    queryKey: ['guidelineRecipients', guidelineId],
+    queryFn: () => getGuidelineRecipientsService(guidelineId),
+    enabled: !!guidelineId,
   });
 };

@@ -338,3 +338,64 @@ export const replyToTicketService = async ({ id, data }) => {
         errorHandling(error);
     }
 };
+
+/* ********** GUIDELINES ********** */
+
+export const createGuidelineService = async (formData) => {
+    try {
+        const response = await apiRequest.post("/supervisor/guidelines", formData, {
+            headers: { 'Content-Type': 'multipart/form-data' },
+            timeout: 60000,
+        });
+        return response.data;
+    } catch (error) {
+        errorHandling(error);
+    }
+};
+
+export const getSupervisorGuidelinesService = async () => {
+    try {
+        const response = await apiRequest.get("/supervisor/guidelines");
+        return response.data;
+    } catch (error) {
+        errorHandling(error);
+    }
+};
+
+export const downloadGuidelineService = async (guidelineId) => {
+    try {
+        const response = await apiRequest.get(`/supervisor/guidelines/${guidelineId}/download`, {
+            responseType: 'blob'
+        });
+        return response;
+    } catch (error) {
+        errorHandling(error);
+    }
+};
+
+export const addGuidelineCommentService = async ({ guidelineId, comments }) => {
+    try {
+        const response = await apiRequest.post(`/supervisor/guidelines/${guidelineId}/comments`, { comments });
+        return response.data;
+    } catch (error) {
+        errorHandling(error);
+    }
+};
+
+export const shareGuidelineService = async ({ guidelineId, studentIds, shareWithAll }) => {
+    try {
+        const response = await apiRequest.post(`/supervisor/guidelines/${guidelineId}/share`, { studentIds, shareWithAll });
+        return response.data;
+    } catch (error) {
+        errorHandling(error);
+    }
+};
+
+export const getGuidelineRecipientsService = async (guidelineId) => {
+    try {
+        const response = await apiRequest.get(`/supervisor/guidelines/${guidelineId}/recipients`);
+        return response.data;
+    } catch (error) {
+        errorHandling(error);
+    }
+};

@@ -7,6 +7,7 @@ import { useUploadReviewedDocument, useDownloadStudentDocument } from '../../sto
 const DocumentReviewModal = ({ isOpen, onClose, document, allDocuments, student }) => {
   const [reviewComments, setReviewComments] = useState('');
   const [reviewedFile, setReviewedFile] = useState(null);
+  const [noDocument, setNoDocument] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [downloadingId, setDownloadingId] = useState(null);
   const [isAddingAnotherReview, setIsAddingAnotherReview] = useState(false);
@@ -73,7 +74,7 @@ const DocumentReviewModal = ({ isOpen, onClose, document, allDocuments, student 
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (!reviewedFile) {
+    if (!noDocument && !reviewedFile) {
       toast.error('Please upload a reviewed document');
       return;
     }
@@ -82,20 +83,23 @@ const DocumentReviewModal = ({ isOpen, onClose, document, allDocuments, student 
     
     try {
       const formData = new FormData();
-      formData.append('file', reviewedFile);
+      if (!noDocument) {
+        formData.append('file', reviewedFile);
+      }
       formData.append('reviewComments', reviewComments);
+      formData.append('noDocument', noDocument ? 'true' : 'false');
 
       await uploadReviewedMutation.mutateAsync({
         documentId: document.id,
         formData
       });
 
-      toast.success('Reviewed document uploaded successfully!');
+      toast.success('Review submitted successfully!');
       setIsAddingAnotherReview(false);
       onClose();
     } catch (error) {
       console.error('Upload error:', error);
-      toast.error(error.message || 'Failed to upload reviewed document');
+      toast.error(error.message || 'Failed to submit review');
     } finally {
       setIsSubmitting(false);
     }
@@ -104,6 +108,7 @@ const DocumentReviewModal = ({ isOpen, onClose, document, allDocuments, student 
   const handleClose = () => {
     setReviewComments('');
     setReviewedFile(null);
+    setNoDocument(false);
     setIsAddingAnotherReview(false);
     onClose();
   };
@@ -242,6 +247,7 @@ const DocumentReviewModal = ({ isOpen, onClose, document, allDocuments, student 
                               </div>
                             </div>
                             
+                            {reviewDoc.fileName && (
                             <button
                               type="button"
                               onClick={() => handleDownload(reviewDoc.id, reviewDoc.fileName || reviewDoc.title)}
@@ -260,6 +266,7 @@ const DocumentReviewModal = ({ isOpen, onClose, document, allDocuments, student 
                               )}
                               Download
                             </button>
+                            )}
                           </div>
                           
                           {(reviewDoc.reviewComments || reviewDoc.description) && (
@@ -311,7 +318,27 @@ const DocumentReviewModal = ({ isOpen, onClose, document, allDocuments, student 
               />
             </div>
 
+            {/* No Document Checkbox */}
+            <div className="flex items-center gap-3 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+              <input
+                id="noDocument"
+                type="checkbox"
+                checked={noDocument}
+                onChange={(e) => {
+                  setNoDocument(e.target.checked);
+                  if (e.target.checked) {
+                    setReviewedFile(null);
+                  }
+                }}
+                className="h-4 w-4 text-amber-600 border-gray-300 rounded focus:ring-amber-500 cursor-pointer"
+              />
+              <label htmlFor="noDocument" className="text-sm text-amber-900 cursor-pointer select-none">
+                No document — comments only
+              </label>
+            </div>
+
             {/* Upload Reviewed Document */}
+            {!noDocument && (
             <div>
               <label htmlFor="reviewedFile" className="block text-sm font-medium text-gray-700 mb-1">
                 Upload Reviewed Document *
@@ -378,6 +405,7 @@ const DocumentReviewModal = ({ isOpen, onClose, document, allDocuments, student 
                 </div>
               )}
             </div>
+            )}
 
             {/* Action Buttons */}
             <div className="flex justify-end space-x-3 pt-4">
@@ -396,10 +424,10 @@ const DocumentReviewModal = ({ isOpen, onClose, document, allDocuments, student 
               </button>
               <button
                 type="submit"
-                disabled={isSubmitting || !reviewedFile}
+                disabled={isSubmitting || (!noDocument && !reviewedFile)}
                 className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
               >
-                {isSubmitting ? 'Uploading...' : 'Upload Review'}
+                {isSubmitting ? 'Submitting...' : 'Submit Review'}
               </button>
             </div>
           </form>
