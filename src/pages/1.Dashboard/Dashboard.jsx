@@ -17,7 +17,7 @@ import DashboardPendingReview from "./DashboardPendingReview";
 import DashboardUpcomingAppointments from "./DashboardUpcomingAppointments";
 import DocumentReviewModal from "@/pages/7.Documents/DocumentReviewModal";
 
-const STATUS_COLORS = ["#22C55E", "#F59E42", "#FACC15", "#6366F1", "#F43F5E"];
+const STATUS_COLORS = ["#3B82F6", "#10B981", "#F59E0B", "#8B5CF6", "#EC4899", "#06B6D4", "#F97316"];
 
 const Dashboard = () => {
   const navigate = useNavigate();
