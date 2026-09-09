@@ -239,6 +239,7 @@ export const useUploadReviewedDocument = () => {
       // Invalidate student documents to refresh the list
       queryClient.invalidateQueries({ queryKey: ['studentDocuments'] });
       queryClient.invalidateQueries({ queryKey: ['pendingReviews'] });
+      queryClient.invalidateQueries({ queryKey: ['assignedStudents'] });
     },
   });
 }; 

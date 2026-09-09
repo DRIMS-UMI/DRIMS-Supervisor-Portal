@@ -38,6 +38,7 @@ const DocumentNotificationHandler = () => {
       const document = data.document;
       queryClient.invalidateQueries({ queryKey: ['pendingReviews'] });
       queryClient.invalidateQueries({ queryKey: ['studentDocuments'] });
+      queryClient.invalidateQueries({ queryKey: ['assignedStudents'] });
       toast.success(
         `New document uploaded by ${document.studentName}: ${document.title}`,
         {
@@ -54,6 +55,7 @@ const DocumentNotificationHandler = () => {
     } else if (data.type === 'document_deleted' && data.studentName) {
       queryClient.invalidateQueries({ queryKey: ['pendingReviews'] });
       queryClient.invalidateQueries({ queryKey: ['studentDocuments'] });
+      queryClient.invalidateQueries({ queryKey: ['assignedStudents'] });
       toast.info(`${data.studentName} deleted a document`);
     } else if (data.type === 'new_message') {
       queryClient.invalidateQueries({ queryKey: ['recentMessages'] });

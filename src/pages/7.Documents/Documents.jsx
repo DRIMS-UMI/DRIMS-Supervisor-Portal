@@ -10,7 +10,13 @@ const Documents = () => {
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
 
   const { data: studentsData, isLoading: isLoadingStudents } = useGetAssignedStudents();
-  const students = studentsData?.students || [];
+  const students = (studentsData?.students || []).slice().sort((a, b) => {
+    const aPending = a.documentSummary?.pending || 0;
+    const bPending = b.documentSummary?.pending || 0;
+    const aOverdue = a.documentSummary?.overdue || 0;
+    const bOverdue = b.documentSummary?.overdue || 0;
+    return bPending - aPending || bOverdue - aOverdue;
+  });
 
   const handleStudentSelect = (student) => {
     setSelectedStudent(student);
@@ -97,6 +103,31 @@ const Documents = () => {
                             {student.registrationNumber}
                           </p>
                         </div>
+                        {(() => {
+                          const pending = student.documentSummary?.pending || 0;
+                          const overdue = student.documentSummary?.overdue || 0;
+                          if (pending === 0) {
+                            return (
+                              <span
+                                title="No pending documents"
+                                className="flex-none inline-flex items-center justify-center min-w-[1.5rem] h-6 px-1.5 rounded-full bg-gray-100 text-gray-400 text-xs font-medium"
+                              >
+                                0
+                              </span>
+                            );
+                          }
+                          return (
+                            <span
+                              title={overdue > 0 ? `${overdue} overdue of ${pending} pending documents` : `${pending} pending documents`}
+                              className={`flex-none inline-flex items-center justify-center min-w-[1.5rem] h-6 px-1.5 rounded-full text-xs font-semibold ${overdue > 0
+                                  ? 'bg-red-100 text-red-700'
+                                  : 'bg-amber-100 text-amber-700'
+                                }`}
+                            >
+                              {pending}
+                            </span>
+                          );
+                        })()}
                       </div>
                     </button>
                   ))}
