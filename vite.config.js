@@ -12,7 +12,7 @@ const iconHash = crypto.createHash('md5').update(fs.readFileSync('public/pwa-512
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
-    react(), 
+    react(),
     tailwindcss(),
     VitePWA({
       registerType: 'prompt',
@@ -24,7 +24,8 @@ export default defineConfig({
       manifest: {
         name: 'DRIMS STAFF PORTAL',
         short_name: 'DRIMS STAFF',
-        description: 'University Management Information System - Supervisor Portal',
+        description: 'DRIMS UMI - Supervisor Portal',
+        id: '/staff/',
         theme_color: '#2563eb',
         background_color: '#ffffff',
         display: 'standalone',
@@ -59,6 +60,7 @@ export default defineConfig({
         ]
       },
       workbox: {
+        clientsClaim: true,
         globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
         runtimeCaching: [
           {
