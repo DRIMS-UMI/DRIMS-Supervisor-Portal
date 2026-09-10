@@ -4,4 +4,5 @@
 declare const __APP_VERSION__: {
   version: string;
   build: string;
+  iconVersion: string;
 };
