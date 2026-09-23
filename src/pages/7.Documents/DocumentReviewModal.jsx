@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { format } from 'date-fns';
 import { useMutation } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { useUploadReviewedDocument, useDownloadStudentDocument } from '../../store/tanstackStore/services/queries';
+import { useUploadReviewedDocument, useDownloadStudentDocument, useDeleteReviewedDocument } from '../../store/tanstackStore/services/queries';
 
 const DocumentReviewModal = ({ isOpen, onClose, document, allDocuments, student }) => {
   const [reviewComments, setReviewComments] = useState('');
@@ -11,9 +11,11 @@ const DocumentReviewModal = ({ isOpen, onClose, document, allDocuments, student 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [downloadingId, setDownloadingId] = useState(null);
   const [isAddingAnotherReview, setIsAddingAnotherReview] = useState(false);
+  const [deletingId, setDeletingId] = useState(null);
 
   const uploadReviewedMutation = useUploadReviewedDocument();
   const downloadMutation = useDownloadStudentDocument();
+  const deleteMutation = useDeleteReviewedDocument();
 
   const handleDownload = (docId, filename) => {
     const downloadDocId = typeof docId === 'string' ? docId : document.id;
@@ -40,6 +42,26 @@ const DocumentReviewModal = ({ isOpen, onClose, document, allDocuments, student 
         toast.error(error.message || 'Failed to download document');
       }
     });
+  };
+
+  const handleDeleteReview = (reviewDocId) => {
+    if (!window.confirm('Delete this reviewed file? This action cannot be undone.')) return;
+    setDeletingId(reviewDocId);
+
+    deleteMutation.mutate(
+      { documentId: document.id, reviewId: reviewDocId },
+      {
+        onSuccess: (response) => {
+          setDeletingId(null);
+          toast.success(response?.message || 'Reviewed document deleted successfully.');
+          onClose();
+        },
+        onError: (error) => {
+          setDeletingId(null);
+          toast.error(error?.message || 'Failed to delete reviewed document');
+        }
+      }
+    );
   };
 
   const relatedReviews = allDocuments?.filter(d => 
@@ -250,6 +272,7 @@ const DocumentReviewModal = ({ isOpen, onClose, document, allDocuments, student 
                               </div>
                             </div>
                             
+                            <div className="flex items-center gap-2">
                             {reviewDoc.fileName ? (
                             <button
                               type="button"
@@ -277,6 +300,25 @@ const DocumentReviewModal = ({ isOpen, onClose, document, allDocuments, student 
                                 Comments Only
                               </span>
                             )}
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteReview(reviewDoc.id)}
+                              disabled={deletingId === reviewDoc.id}
+                              className="px-3 py-1.5 text-sm font-medium text-red-600 bg-red-50 border border-red-200 rounded-md hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-red-500 flex items-center gap-2 cursor-pointer"
+                            >
+                              {deletingId === reviewDoc.id ? (
+                                <svg className="w-4 h-4 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                              ) : (
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
+                              )}
+                              Delete
+                            </button>
+                            </div>
                           </div>
                           
                           {(reviewDoc.reviewComments || reviewDoc.description) && (

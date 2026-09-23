@@ -23,6 +23,7 @@ import {
   getStudentDocumentsService,
   downloadStudentDocumentService,
   uploadReviewedDocumentService,
+  deleteReviewedDocumentService,
   getAvailabilitiesService,
   addAvailabilityService,
   deleteAvailabilityService,
@@ -243,6 +244,19 @@ export const useUploadReviewedDocument = () => {
     },
   });
 }; 
+
+export const useDeleteReviewedDocument = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ documentId, reviewId }) => deleteReviewedDocumentService(documentId, reviewId),
+    onSuccess: () => {
+      // Invalidate student documents to refresh the list
+      queryClient.invalidateQueries({ queryKey: ['studentDocuments'] });
+      queryClient.invalidateQueries({ queryKey: ['pendingReviews'] });
+      queryClient.invalidateQueries({ queryKey: ['assignedStudents'] });
+    },
+  });
+};
 
 /* ********** APPOINTMENTS QUERIES ********** */
 

@@ -248,6 +248,15 @@ export const uploadReviewedDocumentService = async (documentId, formData) => {
     }
 }; 
 
+export const deleteReviewedDocumentService = async (documentId, reviewId) => {
+    try {
+        const response = await apiRequest.delete(`/supervisor/documents/${documentId}/review/${reviewId}`);
+        return response.data;
+    } catch (error) {
+        errorHandling(error);
+    }
+}; 
+
 /* ********** APPOINTMENTS ********** */
 
 export const getAvailabilitiesService = async () => {
