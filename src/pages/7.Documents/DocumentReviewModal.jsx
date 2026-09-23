@@ -61,12 +61,6 @@ const DocumentReviewModal = ({ isOpen, onClose, document, allDocuments, student 
         return;
       }
 
-      // Validate file size (10MB limit)
-      if (selectedFile.size > 10 * 1024 * 1024) {
-        toast.error('File size must be less than 10MB');
-        return;
-      }
-
       setReviewedFile(selectedFile);
     }
   };
@@ -416,7 +410,7 @@ const DocumentReviewModal = ({ isOpen, onClose, document, allDocuments, student 
                       </label>
                       <p className="pl-1">or drag and drop</p>
                     </div>
-                    <p className="text-xs text-gray-500">PDF, DOC, DOCX up to 10MB</p>
+                    <p className="text-xs text-gray-500">PDF, DOC, DOCX</p>
                   </div>
                 </div>
               )}

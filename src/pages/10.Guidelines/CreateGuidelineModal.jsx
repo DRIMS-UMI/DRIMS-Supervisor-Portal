@@ -13,7 +13,6 @@ const CreateGuidelineModal = ({ isOpen, onClose, onCreated }) => {
 
   const allowedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
   const allowedExtensions = ['.pdf', '.doc', '.docx'];
-  const maxSize = 10 * 1024 * 1024;
 
   const handleDrag = (e) => {
     e.preventDefault();
@@ -38,10 +37,6 @@ const CreateGuidelineModal = ({ isOpen, onClose, onCreated }) => {
     const extension = '.' + selectedFile.name.split('.').pop().toLowerCase();
     if (!allowedExtensions.includes(extension) && !allowedTypes.includes(selectedFile.type)) {
       toast.error('Please upload a PDF, DOC, or DOCX file');
-      return;
-    }
-    if (selectedFile.size > maxSize) {
-      toast.error('File size must be less than 10MB');
       return;
     }
     setFile(selectedFile);
@@ -178,7 +173,7 @@ const CreateGuidelineModal = ({ isOpen, onClose, onCreated }) => {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                   </svg>
                   <p className="mt-2 text-sm text-gray-600">Drag and drop a file here, or click to select</p>
-                  <p className="mt-1 text-xs text-gray-500">PDF, DOC, DOCX up to 10MB</p>
+                  <p className="mt-1 text-xs text-gray-500">PDF, DOC, DOCX</p>
                 </div>
               ) : (
                 <div className="flex items-center justify-center space-x-4">
