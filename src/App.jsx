@@ -28,6 +28,7 @@ import PWAInstaller from './components/PWAInstaller';
 import PWAUpdateToast from './components/PWAUpdateToast';
 
 import SupportChatWidget from './components/SupportChatWidget';
+import { WhatsNewProvider } from './components/WhatsNew';
 
 // Global Document Notification Handler
 const DocumentNotificationHandler = () => {
@@ -141,6 +142,7 @@ function AppRoutes() {
 
 function App() {
   return (
+    <WhatsNewProvider>
     <BrowserRouter>
       <AuthProvider>
         <AppRoutes />
@@ -151,6 +153,7 @@ function App() {
       <DocumentNotificationHandler />
       <SupportChatWidget />
     </BrowserRouter>
+    </WhatsNewProvider>
   );
 }
 
